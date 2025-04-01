@@ -42,6 +42,9 @@ class Rio {
   void cfarDetectionsCallback(const sensor_msgs::PointCloud2Ptr& msg);
   void baroCallback(const sensor_msgs::FluidPressureConstPtr& msg);
 
+  // Default radar topic
+  std::string radar_topic_ = "radar/cfar_detections";
+
   ros::Publisher odom_navigation_pub_;
   ros::Publisher odom_optimizer_pub_;
   ros::Publisher timing_pub_;

@@ -27,7 +27,13 @@ bool Rio::init() {
       nh_.subscribe("imu/data_raw", queue_size, &Rio::imuRawCallback, this);
   imu_filter_sub_ =
       nh_.subscribe("imu/data", queue_size, &Rio::imuFilterCallback, this);
-  radar_cfar_sub_ = nh_.subscribe("radar/cfar_detections", queue_size,
+  if (!loadParam<std::string>(nh_private_, "radar_topic", &radar_topic_)){
+    LOG(I, "No specific radar topic set. Defaulting to: " << radar_topic_);
+  }
+  else {
+    LOG(I, "Radar topic set to: " << radar_topic_);
+  }
+  radar_cfar_sub_ = nh_.subscribe(radar_topic_, queue_size,
                                   &Rio::cfarDetectionsCallback, this);
 
   if (!loadParam<bool>(nh_private_, "baro/active", &baro_active_)) return false;
