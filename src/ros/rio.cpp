@@ -264,6 +264,7 @@ void Rio::imuFilterCallback(const sensor_msgs::ImuConstPtr& msg) {
 
 void Rio::cfarDetectionsCallback(const sensor_msgs::PointCloud2Ptr& msg) {
   gttic_(cfarDetectionsCallback);
+  tictoc_print();
   if (msg->header.stamp.toSec() == 0) {
     LOG(W, "Received CFAR detections with t=0, skipping...");
     return;

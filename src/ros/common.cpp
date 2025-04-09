@@ -183,30 +183,35 @@ bool rio::loadNoiseRadarTrack(const ros::NodeHandle& nh,
 }
 
 std::vector<mav_sensors::Radar::CfarDetection> rio::parseRadarMsg(
-    const sensor_msgs::PointCloud2Ptr& msg) {
-  std::vector<mav_sensors::Radar::CfarDetection> detections(msg->height *
-                                                            msg->width);
-  sensor_msgs::PointCloud2Iterator<float> iter_x(*msg, "x");
-  sensor_msgs::PointCloud2Iterator<float> iter_y(*msg, "y");
-  sensor_msgs::PointCloud2Iterator<float> iter_z(*msg, "z");
-  sensor_msgs::PointCloud2Iterator<float> iter_doppler(*msg, "doppler");
-  sensor_msgs::PointCloud2Iterator<int16_t> iter_snr(*msg, "snr");
-  sensor_msgs::PointCloud2Iterator<int16_t> iter_noise(*msg, "noise");
-  for (auto& detection : detections) {
-    detection.x = *(iter_x);
-    detection.y = *(iter_y);
-    detection.z = -(*(iter_z));
-    detection.velocity = *(iter_doppler);
-    detection.snr = *(iter_snr);
-    detection.noise = *(iter_noise);
-    ++iter_x;
-    ++iter_y;
-    ++iter_z;
-    ++iter_doppler;
-    ++iter_snr;
-    ++iter_noise;
-  }
-  return detections;
+  const sensor_msgs::PointCloud2Ptr& msg) {
+const size_t max_detections = 1000;   // Limit number of detections. Assuming that 1'000 is enough to use all
+std::vector<mav_sensors::Radar::CfarDetection> detections(
+    std::min(static_cast<size_t>(msg->height * msg->width), max_detections));
+
+sensor_msgs::PointCloud2Iterator<float> iter_x(*msg, "x");
+sensor_msgs::PointCloud2Iterator<float> iter_y(*msg, "y");
+sensor_msgs::PointCloud2Iterator<float> iter_z(*msg, "z");
+sensor_msgs::PointCloud2Iterator<float> iter_doppler(*msg, "doppler");
+// sensor_msgs::PointCloud2Iterator<float> iter_snr(*msg, "snr");      // For Zadar
+// sensor_msgs::PointCloud2Iterator<float> iter_noise(*msg, "noise");  // For Zadar
+sensor_msgs::PointCloud2Iterator<int16_t> iter_snr(*msg, "snr");     // For TI
+sensor_msgs::PointCloud2Iterator<int16_t> iter_noise(*msg, "noise"); // For TI
+
+for (size_t i = 0; i < detections.size(); ++i) {
+  detections[i].x = *(iter_x);
+  detections[i].y = *(iter_y);
+  detections[i].z = *(iter_z);
+  detections[i].velocity = *(iter_doppler);
+  detections[i].snr = *(iter_snr);
+  detections[i].noise = *(iter_noise);
+  ++iter_x;
+  ++iter_y;
+  ++iter_z;
+  ++iter_doppler;
+  ++iter_snr;
+  ++iter_noise;
+}
+return detections;
 }
 
 double rio::computeBaroHeight(double pressure) {
