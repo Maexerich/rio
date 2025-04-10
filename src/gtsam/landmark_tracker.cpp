@@ -30,6 +30,7 @@ bool Tracker::detectLandmark(
 
 std::vector<Track::Ptr> Tracker::addCfarDetections(
     const std::vector<mav_sensors::Radar::CfarDetection>& cfar_detection) {
+  const size_t MAX_TRACKS = 500;
   // Filter deprecated tracks.
   std::vector<Track::Ptr> active_tracks;
   std::copy_if(tracks_.begin(), tracks_.end(),
@@ -52,14 +53,20 @@ std::vector<Track::Ptr> Tracker::addCfarDetections(
       updated_tracks.emplace_back(*updated_track);
       continue;
     }
+
+    if (active_tracks.size() >= MAX_TRACKS) {
+      LOG(W, "Maximum number of tracks reached: " << MAX_TRACKS);
+      break;
+    }
+    
     // Create new tracks.
     updated_tracks.emplace_back(new Track(cfar_detection, id_++, max_age_));
     active_tracks.push_back(updated_tracks.back());
     LOG(D, "New track created with id: " << id_ - 1);
   }
 
-  LOG(D, "Returning " << updated_tracks.size() << " updated tracks.");
-  LOG(D, "Total " << active_tracks.size() << " active tracks.");
+  LOG(I, "Returning " << updated_tracks.size() << " updated tracks.");
+  LOG(I, "Total " << active_tracks.size() << " active tracks.");
   tracks_ = active_tracks;
   return updated_tracks;
 }

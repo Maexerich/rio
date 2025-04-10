@@ -184,10 +184,14 @@ bool rio::loadNoiseRadarTrack(const ros::NodeHandle& nh,
 
 std::vector<mav_sensors::Radar::CfarDetection> rio::parseRadarMsg(
   const sensor_msgs::PointCloud2Ptr& msg) {
-const size_t max_detections = 1000;   // Limit number of detections. Assuming that 1'000 is enough to use all
+LOG(I, "|--       [parseRadarMsg]");
+const size_t max_detections = 800;   // Limit number of detections. Assuming that 1'000 is enough to use all
 std::vector<mav_sensors::Radar::CfarDetection> detections(
     std::min(static_cast<size_t>(msg->height * msg->width), max_detections));
-
+LOG(I, "|-- Size of detections: " << msg->height * msg->width);
+if (msg->height * msg->width > max_detections) {
+  LOG(W, "Number of detections " << msg->height * msg->width << " exceeds limit of " << max_detections);
+}
 sensor_msgs::PointCloud2Iterator<float> iter_x(*msg, "x");
 sensor_msgs::PointCloud2Iterator<float> iter_y(*msg, "y");
 sensor_msgs::PointCloud2Iterator<float> iter_z(*msg, "z");
